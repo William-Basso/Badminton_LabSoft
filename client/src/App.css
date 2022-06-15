@@ -125,7 +125,7 @@ p {
 
 #rodape {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   padding-left: 1%;
   padding-right: 1%;
@@ -233,7 +233,21 @@ p {
 }
 
 #wrapNovoJogo {
+  display: flex;
+  flex-direction: row;
   width: 100%;
+}
+
+#wrapForm1 {
+  width: 40%;
+  margin: 5% 5% 0% 10%;
+}
+
+#wrapForm2 {
+  width: 40%;
+  margin: 5% 5% 0% 10%;
+  display: flex;
+  flex-direction: column;
 }
 
 #wrapPartidasRecentes {
@@ -246,10 +260,7 @@ p {
   text-align: center;
 }
 
-#wrapForm1 {
-  width: 40%;
-  margin: 5% 5% 0% 10%;
-}
+
 
 #title {
   text-align: center;
@@ -275,4 +286,39 @@ p {
   flex-direction: row;
   padding-left: 10%;
   padding-right: 10%;
+}
+
+#numPesqPart {
+  height: 38px;
+  width: 100%;
+  padding: none !important;
+}
+
+#voltar {
+  padding: 1%;
+}
+
+#reported-content {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  width: 75%;
+  min-height: 100vh;
+  height: fit-content;
+  padding-top: 10vh;
+}
+
+.reportedArea {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 5% 10%;
+  min-width: 205px;
+  height: fit-content;
+}
+
+#linha {
+  display: flex;
+  flex-direction: row;
+
 }

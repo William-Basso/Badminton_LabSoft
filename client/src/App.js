@@ -13,17 +13,19 @@ import axios from 'axios';
 import { BoxArrowLeft } from 'react-bootstrap-icons';
 import ResponsiveTable from './model/tabela'
 import { useEffect } from 'react';
+import NumericInput from 'react-numeric-input';
 
 
 function App() {
   const [page, setPage] = useState(0);
-
+  const [numInput, setNumInput] = useState(0)
+  const [disablePesq, setDisablePesq] = useState(true);
   const [disable, setDisable] = useState(true);
-
+  const [ultimaPartida, setUltimaPartida] = useState(0)
   const [showFim, setShowFim] = useState(false);
   const [showModal, set_showModal] = useState(false)
   const [areaSelecionada, set_areaSelecionada] = useState(0)
-  const [textInput, setTextInput] = useState("a")
+  const [textInput, setTextInput] = useState("")
 
   const dispatch = useDispatch();
   const jogador = useSelector((state) => state.jogador);
@@ -162,17 +164,117 @@ function App() {
       set_showModal(false)
     }
   }
-  // const arr = [{ pk_partida: 0, jogador: "", totalpontos: 0 }]
-  const [partidasRecentes, setPartidasRecentes] = useState([])
 
+  // Pratida recentes
+  const [partidasRecentes, setPartidasRecentes] = useState([])
   const [showTable, setShowTable] = useState(true)
   useEffect(() => {
     axios.get('/partidas').then(resp => {
       setPartidasRecentes(resp.data)
+      axios.get('/ultimaPartida').then(resp => {
+        let ultimaPart = (parseInt(resp.data, 10))
+        setUltimaPartida(ultimaPart)
+      })
+        .then(function (response) {
+          console.log(response);
+          setShowTable(false)
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     })
-    setShowTable(false)
+
+
   }, [showTable])
 
+
+
+  useEffect(() => {
+    if (numInput > 0 && numInput <= ultimaPartida) {
+      setDisablePesq(false)
+    } else {
+      setDisablePesq(true)
+    }
+  }, [numInput])
+
+  // Relatório ----------------------------------------------------------------------------------------------
+
+  const [reportedPartida, setReportedPartida] = useState([])
+  const [reportedFora, setReportedFora] = useState([])
+  const [reportedArea1, setReportedArea1] = useState([])
+  const [reportedArea2, setReportedArea2] = useState([])
+  const [reportedArea3, setReportedArea3] = useState([])
+  const [reportedArea4, setReportedArea4] = useState([])
+  const [reportedArea5, setReportedArea5] = useState([])
+  const [reportedArea6, setReportedArea6] = useState([])
+
+  useEffect(() => {
+    // console.log("reportedArea6.hasOwnProperty: " + reportedArea6.hasOwnProperty('0'))
+    if (reportedArea6[0]) {
+      setPage(2)
+    }
+  }, [reportedArea6])
+
+  const handlePesquisar = () => {
+    axios.post('/reportPartida', {
+      partida: numInput
+    }).then(resp => {
+
+      console.log(resp.data);
+      setReportedPartida(resp.data)
+      axios.post('/reportFora', {
+        partida: numInput
+      }).then(resp => {
+
+        console.log(resp.data);
+        setReportedFora(resp.data)
+        for (let i = 0; i < 6; i++) {
+          axios.post('/reportArea', {
+            area: i + 1,
+            partida: numInput
+          }).then(resp => {
+            console.log(resp.data);
+            switch (i) {
+              case 0:
+                setReportedArea1(resp.data)
+                break;
+              case 1:
+                setReportedArea2(resp.data)
+                break;
+              case 2:
+                setReportedArea3(resp.data)
+                break;
+              case 3:
+                setReportedArea4(resp.data)
+                break;
+              case 4:
+                setReportedArea5(resp.data)
+                break;
+              case 5:
+                setReportedArea6(resp.data)
+                break;
+              default: break;
+            }
+          })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }
+      })
+        .catch(function (error) {
+          console.log(error);
+        });
+    })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
+
+
+  const voltar = () => {
+    setPage(0)
+  }
 
   switch (page) {
     // Página inicial
@@ -191,8 +293,8 @@ function App() {
         </div>
         <div id="body">
           <div id="content">
+            <div id='title'>Novo Jogo</div>
             <div id="wrapNovoJogo">
-              <div id='title'>Novo Jogo</div>
               <div id="wrapForm1">
                 <Form>
                   <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -206,6 +308,21 @@ function App() {
                   </Form.Group>
                 </Form>
               </div>
+              <div id="wrapForm2">
+                <Form>
+                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                    <Form.Label>Pesquisar Relatótio da Partida:</Form.Label>
+                    <NumericInput
+                      id="numPesqPart"
+                      min={0}
+                      max={ultimaPartida}
+                      value={numInput}
+                      onChange={(num) => setNumInput(num)}
+                      placeholder="Número da partida"
+                    />
+                  </Form.Group>
+                </Form>
+              </div>
             </div>
             <div id="container">
               <div id="esq">
@@ -213,11 +330,11 @@ function App() {
                   Iniciar
                 </Button>
               </div>
-              {/* <div id="dir">
-                <Button id="mostrarPartidas" variant="primary" onClick={mostrarPartidas}>
-                  Mostrar Partidas
+              <div id="dir">
+                <Button variant="primary" onClick={handlePesquisar} disabled={disablePesq} >
+                  Pesquisar
                 </Button>
-              </div> */}
+              </div>
             </div>
 
             <div id="wrapPartidasRecentes">
@@ -447,12 +564,118 @@ function App() {
           </Modal.Footer>
         </Modal>
       </React.Fragment >
-    );
+    )
+
     case 2: return (
       <React.Fragment>
-        Tela de Relatorios
+        <div id="header">
+          <div id="voltar">
+            <Button className='left-btn' variant="secondary" onClick={voltar}>
+              Voltar
+            </Button>
+          </div>
+        </div>
+        <div id="body">
+          <div id="reported-content">
+            <div id="linha">
+              <div className='reportedArea'>
+                <h5>Area 1</h5>
+                <p>Saque:     {reportedArea1[0].saque}</p>
+                <p>Forehand:  {reportedArea1[0].forehand}</p>
+                <p>Backhand:  {reportedArea1[0].backhand}</p>
+                <p>Clear:     {reportedArea1[0].clear}</p>
+                <p>Drop:      {reportedArea1[0].drop_}</p>
+                <p>Smash:     {reportedArea1[0].smash}</p>
+                <p>Drive:     {reportedArea1[0].drive}</p>
+                <p>Lob:       {reportedArea1[0].lob}</p>
+                <p>Net Shot:  {reportedArea1[0].netshot}</p>
+                <p>Net Kill:  {reportedArea1[0].netkill}</p>
+                <p>Net Lift:  {reportedArea1[0].netlift}</p>
+                <p>Ponto:     {reportedArea1[0].pontovalido}</p>
+              </div>
+              <div className='reportedArea'>
+                <h5>Area 2</h5>
+                <p>Saque:     {reportedArea2[0].saque}</p>
+                <p>Forehand:  {reportedArea2[0].forehand}</p>
+                <p>Backhand:  {reportedArea2[0].backhand}</p>
+                <p>Clear:     {reportedArea2[0].clear}</p>
+                <p>Drop:      {reportedArea2[0].drop_}</p>
+                <p>Smash:     {reportedArea2[0].smash}</p>
+                <p>Drive:     {reportedArea2[0].drive}</p>
+                <p>Lob:       {reportedArea2[0].lob}</p>
+                <p>Net Shot:  {reportedArea2[0].netshot}</p>
+                <p>Net Kill:  {reportedArea2[0].netkill}</p>
+                <p>Net Lift:  {reportedArea2[0].netlift}</p>
+                <p>Ponto:     {reportedArea2[0].pontovalido}</p>
+              </div>
+              <div className='reportedArea'>
+                <h5>Area 3</h5>
+                <p>Saque:     {reportedArea3[0].saque}</p>
+                <p>Forehand:  {reportedArea3[0].forehand}</p>
+                <p>Backhand:  {reportedArea3[0].backhand}</p>
+                <p>Clear:     {reportedArea3[0].clear}</p>
+                <p>Drop:      {reportedArea3[0].drop_}</p>
+                <p>Smash:     {reportedArea3[0].smash}</p>
+                <p>Drive:     {reportedArea3[0].drive}</p>
+                <p>Lob:       {reportedArea3[0].lob}</p>
+                <p>Net Shot:  {reportedArea3[0].netshot}</p>
+                <p>Net Kill:  {reportedArea3[0].netkill}</p>
+                <p>Net Lift:  {reportedArea3[0].netlift}</p>
+                <p>Ponto:     {reportedArea3[0].pontovalido}</p>
+              </div>
+            </div>
+            <div id='linha'>
+              <div className='reportedArea'>
+                <h5>Area 4</h5>
+                <p>Saque:     {reportedArea4[0].saque}</p>
+                <p>Forehand:  {reportedArea4[0].forehand}</p>
+                <p>Backhand:  {reportedArea4[0].backhand}</p>
+                <p>Clear:     {reportedArea4[0].clear}</p>
+                <p>Drop:      {reportedArea4[0].drop_}</p>
+                <p>Smash:     {reportedArea4[0].smash}</p>
+                <p>Drive:     {reportedArea4[0].drive}</p>
+                <p>Lob:       {reportedArea4[0].lob}</p>
+                <p>Net Shot:  {reportedArea4[0].netshot}</p>
+                <p>Net Kill:  {reportedArea4[0].netkill}</p>
+                <p>Net Lift:  {reportedArea4[0].netlift}</p>
+                <p>Ponto:     {reportedArea4[0].pontovalido}</p>
+              </div>
+              <div className='reportedArea'>
+                <h5>Area 5</h5>
+                <p>Saque:     {reportedArea5[0].saque}</p>
+                <p>Forehand:  {reportedArea5[0].forehand}</p>
+                <p>Backhand:  {reportedArea5[0].backhand}</p>
+                <p>Clear:     {reportedArea5[0].clear}</p>
+                <p>Drop:      {reportedArea5[0].drop_}</p>
+                <p>Smash:     {reportedArea5[0].smash}</p>
+                <p>Drive:     {reportedArea5[0].drive}</p>
+                <p>Lob:       {reportedArea5[0].lob}</p>
+                <p>Net Shot:  {reportedArea5[0].netshot}</p>
+                <p>Net Kill:  {reportedArea5[0].netkill}</p>
+                <p>Net Lift:  {reportedArea5[0].netlift}</p>
+                <p>Ponto:     {reportedArea5[0].pontovalido}</p>
+              </div>
+              <div className='reportedArea'>
+                <h5>Area 6</h5>
+                <p>Saque:     {reportedArea6[0].saque}</p>
+                <p>Forehand:  {reportedArea6[0].forehand}</p>
+                <p>Backhand:  {reportedArea6[0].backhand}</p>
+                <p>Clear:     {reportedArea6[0].clear}</p>
+                <p>Drop:      {reportedArea6[0].drop_}</p>
+                <p>Smash:     {reportedArea6[0].smash}</p>
+                <p>Drive:     {reportedArea6[0].drive}</p>
+                <p>Lob:       {reportedArea6[0].lob}</p>
+                <p>Net Shot:  {reportedArea6[0].netshot}</p>
+                <p>Net Kill:  {reportedArea6[0].netkill}</p>
+                <p>Net Lift:  {reportedArea6[0].netlift}</p>
+                <p>Ponto:     {reportedArea6[0].pontovalido}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </React.Fragment>
-    )
+    );
   }
 
 }

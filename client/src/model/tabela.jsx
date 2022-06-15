@@ -13,10 +13,10 @@ function ResponsiveTable({ itens }) {
       </thead>
       <tbody hover="true">
         {itens.map((itens, index) => (
-          <tr>
-            <td key={index}>{itens.pk_partida}</td>
-            <td key={index}>{itens.jogador}</td>
-            <td key={index}>{itens.totalpontos}</td>
+          <tr key={"Linha_" + index}>
+            <td key={"partida_" + index}>{itens.pk_partida}</td>
+            <td key={"jogador_" + index}>{itens.jogador}</td>
+            <td key={"pontos_" + index}>{itens.totalpontos}</td>
           </tr>
         ))}
       </tbody>

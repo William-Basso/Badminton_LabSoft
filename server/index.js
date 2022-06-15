@@ -70,6 +70,51 @@ app.post("/saveFora", (req, res) => {
   }
 });
 
+app.post("/reportPartida", (req, res) => {
+  try {
+    let body = req.body
+    sCmd(`SELECT * FROM partida WHERE pk_partida = ${body.partida}`)
+      .then((result) => {
+        res.send(result.rows)
+        console.log(`Exito: SELECT * FROM partida WHERE pk_partida = ${body.partida}`)
+      })
+  }
+  catch (e) {
+    res.send('Erro /reportPartida')
+    console.log(e)
+  }
+});
+
+app.post("/reportArea", (req, res) => {
+  try {
+    let body = req.body
+    sCmd(`SELECT * FROM quadra WHERE partida = ${body.partida} AND area = ${body.area}`)
+      .then((result) => {
+        res.send(result.rows)
+        console.log(`Exito: SELECT * FROM quadra WHERE partida = ${body.partida} AND area = ${body.area}`)
+      })
+  }
+  catch (e) {
+    res.send('Erro /reportArea')
+    console.log(e)
+  }
+});
+
+app.post("/reportFora", (req, res) => {
+  try {
+    let body = req.body
+    sCmd(`SELECT * FROM fora WHERE partida = ${body.partida}`)
+      .then((result) => {
+        res.send(result.rows)
+        console.log(`Exito: SELECT * FROM fora WHERE partida = ${body.partida}`)
+      })
+  }
+  catch (e) {
+    res.send('Erro /reportFora')
+    console.log(e)
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
 });
