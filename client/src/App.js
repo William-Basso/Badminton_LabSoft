@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, Component } from 'react';
 import './index.css';
 import './App.css';
 import Modal from 'react-bootstrap/Modal'
@@ -11,9 +11,16 @@ import { updateJogador } from './model/jogador';
 import { Form } from "react-bootstrap";
 import axios from 'axios';
 import { BoxArrowLeft } from 'react-bootstrap-icons';
-import ResponsiveTable from './model/tabela'
+import ResponsiveTable from './Components/tabela'
 import { useEffect } from 'react';
 import NumericInput from 'react-numeric-input';
+import AreasChart from './Components/AreasChart'
+import PontosChart from './Components/PontosChart'
+import AreasTable from './Components/AreasTable'
+import JogadasChart from './Components/JogadasChart'
+import JogadasForaChart from './Components/JogadasForaChart'
+import JogadasBarChart from './Components/JogadasBarChart'
+import JogadasBarChart2 from './Components/JogadasBarChart2'
 
 
 function App() {
@@ -211,6 +218,7 @@ function App() {
   useEffect(() => {
     // console.log("reportedArea6.hasOwnProperty: " + reportedArea6.hasOwnProperty('0'))
     if (reportedArea6[0]) {
+      CalcPercent()
       setPage(2)
     }
   }, [reportedArea6])
@@ -225,7 +233,8 @@ function App() {
       axios.post('/reportFora', {
         partida: numInput
       }).then(resp => {
-
+        //Ultimo then de pesquisa
+        // CalcPercent()
         console.log(resp.data);
         setReportedFora(resp.data)
         for (let i = 0; i < 6; i++) {
@@ -270,11 +279,41 @@ function App() {
       });
   }
 
-
-
   const voltar = () => {
     setPage(0)
   }
+
+  const [percentAreas, setPercentAreas] = useState({
+    a1: 0,
+    a2: 0,
+    a3: 0,
+    a4: 0,
+    a5: 0,
+    a6: 0
+  })
+  const [percentPontos, setPercentPontos] = useState({
+    dentro: 0,
+    fora: 0
+  })
+
+  const CalcPercent = () => {
+    let totalPontosDentro = reportedPartida[0].totalpontos
+    let totalPontosFora = reportedFora[0].pontoinvalido
+    let pontosDentroFora = totalPontosDentro + totalPontosFora;
+    setPercentAreas({
+      a1: (100 * reportedArea1[0].pontovalido) / totalPontosDentro,
+      a2: (100 * reportedArea2[0].pontovalido) / totalPontosDentro,
+      a3: (100 * reportedArea3[0].pontovalido) / totalPontosDentro,
+      a4: (100 * reportedArea4[0].pontovalido) / totalPontosDentro,
+      a5: (100 * reportedArea5[0].pontovalido) / totalPontosDentro,
+      a6: (100 * reportedArea6[0].pontovalido) / totalPontosDentro
+    })
+    setPercentPontos({
+      dentro: (100 * totalPontosDentro) / pontosDentroFora,
+      fora: (100 * totalPontosFora) / pontosDentroFora
+    })
+  }
+
 
   switch (page) {
     // Página inicial
@@ -310,7 +349,7 @@ function App() {
               </div>
               <div id="wrapForm2">
                 <Form>
-                  <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                  <Form.Group id="form-pesquisa" className="mb-3" controlId="exampleForm.ControlInput1">
                     <Form.Label>Pesquisar Relatótio da Partida:</Form.Label>
                     <NumericInput
                       id="numPesqPart"
@@ -350,7 +389,7 @@ function App() {
 
     case 1: return (
       <React.Fragment>
-        <div id="principal">
+        <div id="principal" className='prevent-select'>
           <div id="cab">
             <h4 id="l1_c1" className='centerTitle'>Geral</h4>
             <h4 id="l1_c2" className='centerTitle'>Fora da Quadra</h4>
@@ -511,7 +550,7 @@ function App() {
               </Button>
             </div>
             <div id="dir">
-              <Button variant="success" onClick={handleShowFim}>
+              <Button className='right-btn' variant="success" onClick={handleShowFim}>
                 Salvar
               </Button>
             </div>
@@ -530,7 +569,7 @@ function App() {
           <Modal.Header id="modalHeader">
             <h2>{nomeArea}</h2>
           </Modal.Header>
-          <Modal.Body id="modalBody">
+          <Modal.Body id="modalBody" className='prevent-select'>
             <Button className="btnModal" as="input" type="button" onClick={() => handlePlay(areaSelecionada, 'saque')} value="Saque" />
             <Button className="btnModal" as="input" type="button" onClick={() => handlePlay(areaSelecionada, 'forehand')} value="Forehand" />
             <Button className="btnModal" as="input" type="button" onClick={() => handlePlay(areaSelecionada, 'backhand')} value="Backhand" />
@@ -579,96 +618,136 @@ function App() {
           <div id="reported-content">
             <div id="linha">
               <div className='reportedArea'>
-                <h5>Area 1</h5>
-                <p>Saque:     {reportedArea1[0].saque}</p>
-                <p>Forehand:  {reportedArea1[0].forehand}</p>
-                <p>Backhand:  {reportedArea1[0].backhand}</p>
-                <p>Clear:     {reportedArea1[0].clear}</p>
-                <p>Drop:      {reportedArea1[0].drop_}</p>
-                <p>Smash:     {reportedArea1[0].smash}</p>
-                <p>Drive:     {reportedArea1[0].drive}</p>
-                <p>Lob:       {reportedArea1[0].lob}</p>
-                <p>Net Shot:  {reportedArea1[0].netshot}</p>
-                <p>Net Kill:  {reportedArea1[0].netkill}</p>
-                <p>Net Lift:  {reportedArea1[0].netlift}</p>
-                <p>Ponto:     {reportedArea1[0].pontovalido}</p>
-              </div>
-              <div className='reportedArea'>
-                <h5>Area 2</h5>
-                <p>Saque:     {reportedArea2[0].saque}</p>
-                <p>Forehand:  {reportedArea2[0].forehand}</p>
-                <p>Backhand:  {reportedArea2[0].backhand}</p>
-                <p>Clear:     {reportedArea2[0].clear}</p>
-                <p>Drop:      {reportedArea2[0].drop_}</p>
-                <p>Smash:     {reportedArea2[0].smash}</p>
-                <p>Drive:     {reportedArea2[0].drive}</p>
-                <p>Lob:       {reportedArea2[0].lob}</p>
-                <p>Net Shot:  {reportedArea2[0].netshot}</p>
-                <p>Net Kill:  {reportedArea2[0].netkill}</p>
-                <p>Net Lift:  {reportedArea2[0].netlift}</p>
-                <p>Ponto:     {reportedArea2[0].pontovalido}</p>
-              </div>
-              <div className='reportedArea'>
-                <h5>Area 3</h5>
-                <p>Saque:     {reportedArea3[0].saque}</p>
-                <p>Forehand:  {reportedArea3[0].forehand}</p>
-                <p>Backhand:  {reportedArea3[0].backhand}</p>
-                <p>Clear:     {reportedArea3[0].clear}</p>
-                <p>Drop:      {reportedArea3[0].drop_}</p>
-                <p>Smash:     {reportedArea3[0].smash}</p>
-                <p>Drive:     {reportedArea3[0].drive}</p>
-                <p>Lob:       {reportedArea3[0].lob}</p>
-                <p>Net Shot:  {reportedArea3[0].netshot}</p>
-                <p>Net Kill:  {reportedArea3[0].netkill}</p>
-                <p>Net Lift:  {reportedArea3[0].netlift}</p>
-                <p>Ponto:     {reportedArea3[0].pontovalido}</p>
+                <h4>Dados da Partida</h4>
+                <div className='paragrafo'>
+                  <p><b>Número da Partida:</b> &nbsp; {reportedPartida[0].pk_partida}</p>
+                  <p><b>Nome:</b> &nbsp; {reportedPartida[0].jogador}</p>
+                  <p><b>Total de Pontos Dentro da Quadra:</b> &nbsp; {reportedPartida[0].totalpontos}</p>
+                  <p><b>Total de Pontos Fora da Quadra:</b> &nbsp; {reportedFora[0].pontoinvalido}</p>
+                </div>
               </div>
             </div>
-            <div id='linha'>
+            <div id="linha">
               <div className='reportedArea'>
-                <h5>Area 4</h5>
-                <p>Saque:     {reportedArea4[0].saque}</p>
-                <p>Forehand:  {reportedArea4[0].forehand}</p>
-                <p>Backhand:  {reportedArea4[0].backhand}</p>
-                <p>Clear:     {reportedArea4[0].clear}</p>
-                <p>Drop:      {reportedArea4[0].drop_}</p>
-                <p>Smash:     {reportedArea4[0].smash}</p>
-                <p>Drive:     {reportedArea4[0].drive}</p>
-                <p>Lob:       {reportedArea4[0].lob}</p>
-                <p>Net Shot:  {reportedArea4[0].netshot}</p>
-                <p>Net Kill:  {reportedArea4[0].netkill}</p>
-                <p>Net Lift:  {reportedArea4[0].netlift}</p>
-                <p>Ponto:     {reportedArea4[0].pontovalido}</p>
+                <div id="chart">
+                  <AreasChart percentAreas={percentAreas} />
+                </div>
               </div>
               <div className='reportedArea'>
-                <h5>Area 5</h5>
-                <p>Saque:     {reportedArea5[0].saque}</p>
-                <p>Forehand:  {reportedArea5[0].forehand}</p>
-                <p>Backhand:  {reportedArea5[0].backhand}</p>
-                <p>Clear:     {reportedArea5[0].clear}</p>
-                <p>Drop:      {reportedArea5[0].drop_}</p>
-                <p>Smash:     {reportedArea5[0].smash}</p>
-                <p>Drive:     {reportedArea5[0].drive}</p>
-                <p>Lob:       {reportedArea5[0].lob}</p>
-                <p>Net Shot:  {reportedArea5[0].netshot}</p>
-                <p>Net Kill:  {reportedArea5[0].netkill}</p>
-                <p>Net Lift:  {reportedArea5[0].netlift}</p>
-                <p>Ponto:     {reportedArea5[0].pontovalido}</p>
+                <div id="chart">
+                  <PontosChart percentPontos={percentPontos} />
+                </div>
+              </div>
+            </div>
+            <h3 className='titulo2'>Jogadas por Área</h3>
+            <div id="linha">
+              <div className='reportedArea'>
+                <AreasTable
+                  a1={reportedArea1[0]}
+                  a2={reportedArea2[0]}
+                  a3={reportedArea3[0]}
+                  a4={reportedArea4[0]}
+                  a5={reportedArea5[0]}
+                  a6={reportedArea6[0]}
+                  fora={reportedFora[0]}
+                ></AreasTable>
+              </div>
+            </div>
+            <h3 className='titulo2'>Percentual de Jogadas por Área</h3>
+            <div id="linha">
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 1"} area={reportedArea1[0]} />
+                </div>
               </div>
               <div className='reportedArea'>
-                <h5>Area 6</h5>
-                <p>Saque:     {reportedArea6[0].saque}</p>
-                <p>Forehand:  {reportedArea6[0].forehand}</p>
-                <p>Backhand:  {reportedArea6[0].backhand}</p>
-                <p>Clear:     {reportedArea6[0].clear}</p>
-                <p>Drop:      {reportedArea6[0].drop_}</p>
-                <p>Smash:     {reportedArea6[0].smash}</p>
-                <p>Drive:     {reportedArea6[0].drive}</p>
-                <p>Lob:       {reportedArea6[0].lob}</p>
-                <p>Net Shot:  {reportedArea6[0].netshot}</p>
-                <p>Net Kill:  {reportedArea6[0].netkill}</p>
-                <p>Net Lift:  {reportedArea6[0].netlift}</p>
-                <p>Ponto:     {reportedArea6[0].pontovalido}</p>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 2"} area={reportedArea2[0]} />
+                </div>
+              </div>
+            </div>
+            <div id="linha">
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 3"} area={reportedArea3[0]} />
+                </div>
+              </div>
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 4"} area={reportedArea4[0]} />
+                </div>
+              </div>
+            </div>
+            <div className='page-break'></div>
+            <div id="linha">
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 5"} area={reportedArea5[0]} />
+                </div>
+              </div>
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasChart titulo={"Área 6"} area={reportedArea6[0]} />
+                </div>
+              </div>
+            </div>
+            <div id="linha">
+              <div className='reportedArea'>
+                <div id="chart">
+                  <JogadasForaChart titulo={"Fora"} area={reportedFora[0]} />
+                </div>
+              </div>
+            </div>
+            <h3 className='titulo2'>Quantidade de Jogadas por Área</h3>
+            <div id="linha2">
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 1"} area={reportedArea1[0]} />
+                </div>
+              </div>
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 2"} area={reportedArea2[0]} />
+                </div>
+              </div>
+            </div>
+            <div id="linha2">
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 3"} area={reportedArea3[0]} />
+                </div>
+              </div>
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 4"} area={reportedArea4[0]} />
+                </div>
+              </div>
+            </div>
+            <div id="linha2">
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 5"} area={reportedArea5[0]} />
+                </div>
+              </div>
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Jogadas Área 6"} area={reportedArea6[0]} />
+                </div>
+              </div>
+            </div>
+            <div id="linha2">
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart titulo={"Fora"} area={reportedFora[0]} />
+                </div>
+              </div>
+            </div>
+            <h3 className='titulo2'>Quantidade de Jogadas por Tipo</h3>
+            <div id="linha2">
+              <div className='bar-content'>
+                <div id="chart">
+                  <JogadasBarChart2 titulo={""} a1={reportedArea1[0]} a2={reportedArea2[0]} a3={reportedArea3[0]} a4={reportedArea4[0]} a5={reportedArea5[0]} a6={reportedArea6[0]} a7={reportedFora[0]} />
+                </div>
               </div>
             </div>
           </div>

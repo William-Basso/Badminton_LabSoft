@@ -3,7 +3,7 @@ import Table from 'react-bootstrap/Table';
 
 function ResponsiveTable({ itens }) {
   return (
-    <Table responsive>
+    <Table responsive bordered hover>
       <thead>
         <tr>
           <th>Partida</th>
