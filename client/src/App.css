@@ -333,6 +333,7 @@ th {
   display: flex;
   flex-direction: row;
   width: 100%;
+  transition: opacity 2s ease-in;
 }
 
 #linha2 {
@@ -342,6 +343,7 @@ th {
   padding-top: 2.5%;
   padding-left: 10%;
   padding-right: 9%;
+  transition: opacity 2s ease-in;
 }
 
 #form-pesquisa {
@@ -432,4 +434,14 @@ th {
   .page-break {
     page-break-before: always;
   }
+}
+
+#quadra {
+  display: flex;
+  background-image: url("./img/quadra.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 50%;
+  height: 26vh;
+  margin: 2%;
 }

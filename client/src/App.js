@@ -33,6 +33,7 @@ function App() {
   const [showModal, set_showModal] = useState(false)
   const [areaSelecionada, set_areaSelecionada] = useState(0)
   const [textInput, setTextInput] = useState("")
+  const [report, setReport] = useState(false)
 
   const dispatch = useDispatch();
   const jogador = useSelector((state) => state.jogador);
@@ -47,15 +48,15 @@ function App() {
     //Salvar dados no banco de dados
     axios.get('/ultimaPartida').then(resp => {
       let proxPartida = (parseInt(resp.data, 10) + 1)
-      console.log("a proxPartida é: " + proxPartida)
+      // console.log("a proxPartida é: " + proxPartida)
       axios.post('/savePartida', {
         pk_partida: proxPartida,
         jogador: jogador.nome,
         totalpontos: quadra.totalPontos,
       })
         .then(function (response) {
-          console.log(response);
-          console.log("salvou a partida")
+          // console.log(response);
+          // console.log("salvou a partida")
           axios.post('/saveFora', {
             partida: proxPartida,
             saque: quadra.fora.saque,
@@ -72,10 +73,10 @@ function App() {
             pontoinvalido: quadra.fora.contador
           })
             .then(function (response) {
-              console.log(response);
-              console.log("salvou fora da quadra")
+              // console.log(response);
+              // console.log("salvou fora da quadra")
               for (let i = 0; i < quadra.area.length; i++) {
-                console.log("entrou no loop for: " + i)
+                // console.log("entrou no loop for: " + i)
                 axios.post('/saveQuadra', {
                   partida: proxPartida,
                   area: i + 1,
@@ -93,15 +94,17 @@ function App() {
                   pontovalido: quadra.area[i].ponto
                 })
                   .then(function (response) {
-                    console.log(response);
-                    console.log("salvou a quadra")
+                    // console.log(response);
+                    // console.log("salvou a quadra")
                     dispatch(reset())
                     dispatch(updateJogador({ nome: "" }))
                     setTextInput("")
                     handleCloseFim()
                     setDisable(true)
                     setShowTable(true)
-                    setPage(0)
+                    setNumInput(proxPartida)
+                    setReport(true)
+                    // setPage(0)
 
                   })
                   .catch(function (error) {
@@ -118,6 +121,14 @@ function App() {
         });
     });
   }
+
+  useEffect(() => {
+    if (report) {
+      console.log("numInput: " + numInput)
+      handlePesquisar()
+      setReport(false)
+    }
+  }, [report])
 
   // Leitura de texto do Modal de Novo Jogo
 
@@ -183,7 +194,7 @@ function App() {
         setUltimaPartida(ultimaPart)
       })
         .then(function (response) {
-          console.log(response);
+          // console.log(response);
           setShowTable(false)
         })
         .catch(function (error) {
@@ -228,21 +239,20 @@ function App() {
       partida: numInput
     }).then(resp => {
 
-      console.log(resp.data);
+      // console.log(resp.data);
       setReportedPartida(resp.data)
       axios.post('/reportFora', {
         partida: numInput
       }).then(resp => {
         //Ultimo then de pesquisa
-        // CalcPercent()
-        console.log(resp.data);
+        // console.log(resp.data);
         setReportedFora(resp.data)
         for (let i = 0; i < 6; i++) {
           axios.post('/reportArea', {
             area: i + 1,
             partida: numInput
           }).then(resp => {
-            console.log(resp.data);
+            // console.log(resp.data);
             switch (i) {
               case 0:
                 setReportedArea1(resp.data)
@@ -314,7 +324,72 @@ function App() {
     })
   }
 
+  const [isVisible_1, setIsVisible_1] = useState(false)
+  const [isVisible_2, setIsVisible_2] = useState(false)
+  const [isVisible_3, setIsVisible_3] = useState(false)
+  const [isVisible_4, setIsVisible_4] = useState(false)
+  const [isVisible_5, setIsVisible_5] = useState(false)
+  const [isVisible_6, setIsVisible_6] = useState(false)
+  const [isVisible_7, setIsVisible_7] = useState(false)
+  const [isVisible_8, setIsVisible_8] = useState(false)
+  const [isVisible_9, setIsVisible_9] = useState(false)
+  const [height, setHeight] = useState(0)
 
+  useEffect(() => {
+    if (page !== 2) {
+      setIsVisible_1(false)
+      setIsVisible_2(false)
+      setIsVisible_3(false)
+      setIsVisible_4(false)
+      setIsVisible_5(false)
+      setIsVisible_6(false)
+      setIsVisible_7(false)
+      setIsVisible_8(false)
+      setIsVisible_9(false)
+    }
+  }, [page])
+
+  useEffect(() => {
+    window.addEventListener("scroll", listenToScroll);
+    return () => window.removeEventListener("scroll", listenToScroll)
+  }, [])
+
+  const listenToScroll = () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    setHeight(winScroll);
+    // console.log(winScroll)
+    if (winScroll > 650) {
+      !isVisible_1 && setIsVisible_1(true)
+    }
+    if (winScroll > 1000) {
+      !isVisible_2 && setIsVisible_2(true)
+    }
+    if (winScroll > 1270) {
+      !isVisible_3 && setIsVisible_3(true)
+    }
+    if (winScroll > 1535) {
+      !isVisible_4 && setIsVisible_4(true)
+    }
+    if (winScroll > 1810) {
+      !isVisible_5 && setIsVisible_5(true)
+    }
+    if (winScroll > 2230) {
+      !isVisible_6 && setIsVisible_6(true)
+    }
+    if (winScroll > 2580) {
+      !isVisible_7 && setIsVisible_7(true)
+    }
+    if (winScroll > 2910) {
+      !isVisible_8 && setIsVisible_8(true)
+    }
+    if (winScroll > 3280) {
+      !isVisible_9 && setIsVisible_9(true)
+    }
+  }
+
+  // ----------------------------------------------------------------------
+  //                                   Return
+  // ----------------------------------------------------------------------
   switch (page) {
     // Página inicial
     default: return (
@@ -622,9 +697,11 @@ function App() {
                 <div className='paragrafo'>
                   <p><b>Número da Partida:</b> &nbsp; {reportedPartida[0].pk_partida}</p>
                   <p><b>Nome:</b> &nbsp; {reportedPartida[0].jogador}</p>
-                  <p><b>Total de Pontos Dentro da Quadra:</b> &nbsp; {reportedPartida[0].totalpontos}</p>
-                  <p><b>Total de Pontos Fora da Quadra:</b> &nbsp; {reportedFora[0].pontoinvalido}</p>
+                  <p><b>Pontos Dentro da Quadra:</b> &nbsp; {reportedPartida[0].totalpontos}</p>
+                  <p><b>Pontos Fora da Quadra:</b> &nbsp; {reportedFora[0].pontoinvalido}</p>
                 </div>
+              </div>
+              <div id="quadra" className='reportedArea'>
               </div>
             </div>
             <div id="linha">
@@ -654,102 +731,120 @@ function App() {
               </div>
             </div>
             <h3 className='titulo2'>Percentual de Jogadas por Área</h3>
-            <div id="linha">
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 1"} area={reportedArea1[0]} />
+            {isVisible_1 &&
+              <div id="linha" className='w3-animate-opacity'>
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 1"} area={reportedArea1[0]} />
+                  </div>
+                </div>
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 2"} area={reportedArea2[0]} />
+                  </div>
                 </div>
               </div>
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 2"} area={reportedArea2[0]} />
+            }
+            {isVisible_2 &&
+              <div id="linha">
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 3"} area={reportedArea3[0]} />
+                  </div>
+                </div>
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 4"} area={reportedArea4[0]} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div id="linha">
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 3"} area={reportedArea3[0]} />
+            }
+            {isVisible_3 &&
+              <div id="linha">
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 5"} area={reportedArea5[0]} />
+                  </div>
+                </div>
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasChart titulo={"Área 6"} area={reportedArea6[0]} />
+                  </div>
                 </div>
               </div>
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 4"} area={reportedArea4[0]} />
+            }
+            {isVisible_4 &&
+
+              <div id="linha">
+                <div className='reportedArea'>
+                  <div id="chart">
+                    <JogadasForaChart titulo={"Fora"} area={reportedFora[0]} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className='page-break'></div>
-            <div id="linha">
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 5"} area={reportedArea5[0]} />
-                </div>
-              </div>
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasChart titulo={"Área 6"} area={reportedArea6[0]} />
-                </div>
-              </div>
-            </div>
-            <div id="linha">
-              <div className='reportedArea'>
-                <div id="chart">
-                  <JogadasForaChart titulo={"Fora"} area={reportedFora[0]} />
-                </div>
-              </div>
-            </div>
+            }
             <h3 className='titulo2'>Quantidade de Jogadas por Área</h3>
-            <div id="linha2">
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 1"} area={reportedArea1[0]} />
+            {isVisible_5 &&
+              <div id="linha2">
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 1"} area={reportedArea1[0]} />
+                  </div>
+                </div>
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 2"} area={reportedArea2[0]} />
+                  </div>
                 </div>
               </div>
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 2"} area={reportedArea2[0]} />
+            }
+            {isVisible_6 &&
+              <div id="linha2">
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 3"} area={reportedArea3[0]} />
+                  </div>
+                </div>
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 4"} area={reportedArea4[0]} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div id="linha2">
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 3"} area={reportedArea3[0]} />
+            }
+            {isVisible_7 &&
+              <div id="linha2">
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 5"} area={reportedArea5[0]} />
+                  </div>
+                </div>
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Jogadas Área 6"} area={reportedArea6[0]} />
+                  </div>
                 </div>
               </div>
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 4"} area={reportedArea4[0]} />
+            }
+            {isVisible_8 &&
+              <div id="linha2">
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart titulo={"Fora"} area={reportedFora[0]} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div id="linha2">
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 5"} area={reportedArea5[0]} />
-                </div>
-              </div>
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Jogadas Área 6"} area={reportedArea6[0]} />
-                </div>
-              </div>
-            </div>
-            <div id="linha2">
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart titulo={"Fora"} area={reportedFora[0]} />
-                </div>
-              </div>
-            </div>
+            }
             <h3 className='titulo2'>Quantidade de Jogadas por Tipo</h3>
-            <div id="linha2">
-              <div className='bar-content'>
-                <div id="chart">
-                  <JogadasBarChart2 titulo={""} a1={reportedArea1[0]} a2={reportedArea2[0]} a3={reportedArea3[0]} a4={reportedArea4[0]} a5={reportedArea5[0]} a6={reportedArea6[0]} a7={reportedFora[0]} />
+            {isVisible_9 &&
+              <div id="linha2">
+                <div className='bar-content'>
+                  <div id="chart">
+                    <JogadasBarChart2 titulo={""} a1={reportedArea1[0]} a2={reportedArea2[0]} a3={reportedArea3[0]} a4={reportedArea4[0]} a5={reportedArea5[0]} a6={reportedArea6[0]} />
+                  </div>
                 </div>
               </div>
-            </div>
+            }
           </div>
         </div>
 

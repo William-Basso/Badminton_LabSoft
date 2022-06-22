@@ -46,9 +46,9 @@ export const quadraSlice = createSlice({
       state.fora[tipo]++;
       state.fora.contador++;
     },
-    salvar: (state) => {
-      state.save = state
-    },
+    // salvar: (state) => {
+    //   state.save = state
+    // },
     reset: (state) => {
       for (let index = 0; index < state.area.length; index++) {
         state.area[index].saque = 0;
