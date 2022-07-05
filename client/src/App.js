@@ -1,26 +1,26 @@
 
-import React, { useState, Component } from 'react';
+import React, { useState } from 'react';
 import './index.css';
 import './App.css';
 import Modal from 'react-bootstrap/Modal'
 import "bootstrap/dist/css/bootstrap.css"
 import Button from 'react-bootstrap/Button'
 import { useSelector, useDispatch } from "react-redux";
-import { updateParameters, countFora, reset } from "./model/quadra";
-import { updateJogador } from './model/jogador';
+import { updateParameters, countFora, reset } from "./redux/quadra";
+import { updateJogador } from './redux/jogador';
 import { Form } from "react-bootstrap";
 import axios from 'axios';
 import { BoxArrowLeft } from 'react-bootstrap-icons';
-import ResponsiveTable from './Components/tabela'
+import ResponsiveTable from './components/tabela'
 import { useEffect } from 'react';
 import NumericInput from 'react-numeric-input';
-import AreasChart from './Components/AreasChart'
-import PontosChart from './Components/PontosChart'
-import AreasTable from './Components/AreasTable'
-import JogadasChart from './Components/JogadasChart'
-import JogadasForaChart from './Components/JogadasForaChart'
-import JogadasBarChart from './Components/JogadasBarChart'
-import JogadasBarChart2 from './Components/JogadasBarChart2'
+import AreasChart from './components/AreasChart'
+import PontosChart from './components/PontosChart'
+import AreasTable from './components/AreasTable'
+import JogadasChart from './components/JogadasChart'
+import JogadasForaChart from './components/JogadasForaChart'
+import JogadasBarChart from './components/JogadasBarChart'
+import JogadasBarChart2 from './components/JogadasBarChart2'
 
 
 function App() {
